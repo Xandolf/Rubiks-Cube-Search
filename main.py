@@ -6,7 +6,6 @@ import cube as cbe
 
 
 # TODO {
-#   create goal state test
 #   Test Rotations
 #   ... X-axis
 #   ... Y-axis
@@ -16,15 +15,14 @@ import cube as cbe
 #   ... Depth First
 #   ... A*
 #   Heuristics
-#   ... Entropy
-#   ... Gini
+#   ... safe_log2
 #   ... (3-D?) Manhattan Distance
 #   ... incorrect tiles
 #   Analysis
 #   ... Record nodes expanded for each search as N grows larger
 #   ... display results in graphs
 #   ... Final Documentations
-# }
+#  }
 
 
 

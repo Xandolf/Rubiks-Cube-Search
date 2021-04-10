@@ -4,7 +4,7 @@ import numpy as np
 from matplotlib import colors as c
 
 
-def testPrint():
+def test_print():
     np.random.seed(19680801)
     Z = [[1, 5, 1], [2, 3, 6], [4, 1, 2]]
     Z = [[1, 5, 1], [2, 3, 6], [4, 1, 2]]
@@ -23,6 +23,7 @@ def testPrint():
 
 # Displays the given cube using matplotlib
 def print_cube(cube, annotate=False):
+    size = np.size(cube[0][0], 0)
     figs = []
     axs = []
     blk = c.hex2color("000000")
@@ -31,8 +32,6 @@ def print_cube(cube, annotate=False):
     for face in cube:
         fig, ax = plt.subplots()
         ax.axes.set_axis_off()
-        size = np.size(cube[0][0], 0)
-
         for i in range(size):
             for j in range(size):
                 if annotate:
@@ -43,9 +42,7 @@ def print_cube(cube, annotate=False):
     plt.show()
 
 
-# printCube
-
-
+# initializes the cube with each face being monochromatic with a unique color
 def init_cube(size):
     cube = []
     faces = 6
@@ -56,21 +53,22 @@ def init_cube(size):
     return np.array(cube)
 
 
-# init_cube
-
-
+# Rotates a face of the cube. Used when the section of the cube is one of the outer faces.
 def rotate_face(cube, faceNumber, direction):
     cube[faceNumber] = np.rot90(cube[faceNumber], direction)
     return cube
 
 
+# Rotates section of the cube (based on location) either clockwise or counter clockwise around specified axis
+# The Direction of the rotation is based on the given direction
+# returns the rotated cube
 def x_rotation(cube, location, direction):
     # Rotate Faces on the end (either 0 or size-1)
     size = np.size(cube[0][0], 0)
 
-    if (location == 0):
+    if location == 0:
         cube = rotate_face(cube, 2, direction)
-    elif (location == size - 1):
+    elif location == size - 1:
         cube = rotate_face(cube, 3, -direction)
     # Always rotate the columns
 
@@ -95,9 +93,6 @@ def x_rotation(cube, location, direction):
     return cube
 
 
-# Rotates section of the cube (based on location) either clockwise or counter clockwise around y axis
-# The Direction of the rotation is based on the given direction
-# returns the rotated cube
 def y_rotation(cube, location, direction):
     size = np.size(cube[0][0], 0)
     # rotate appropriate face the location is on either end
@@ -125,8 +120,6 @@ def y_rotation(cube, location, direction):
     return cube
 
 
-# Seems to be working
-
 def z_rotation(cube, location, direction):
     size = np.size(cube[0][0], 0)
     # rotate appropriate face the location is on either end
@@ -143,7 +136,6 @@ def z_rotation(cube, location, direction):
                 cube[2][size - 1 - j][location], cube[0][size - 1 - location][size - 1 - j], \
                 cube[0][size - 1 - location][size - 1 - j], cube[3][j][size - 1 - location], cube[5][location][j]
 
-
     # Counter Clockwise
     elif direction < 0:
         for i in range(size):
@@ -156,7 +148,7 @@ def z_rotation(cube, location, direction):
 
 
 # returns all potential actions for a given cube
-def getAllActions(cube):
+def get_all_actions(cube):
     size = np.size(cube[0][0], 0)
     transitions = []
     # adds a rotation of each axis for the size of our cube
@@ -171,23 +163,75 @@ def getAllActions(cube):
     return transitions
 
 
-def getActionResult(cube, action):
-    if action[2] == 'X':
-        x_rotation(cube, action[0], action[2])
-    elif action[2] == 'Y':
-        y_rotation(cube, action[0], action[2])
-    elif action[2] == 'Z':
-        z_rotation(cube, action[0], action[2])
+# returns a transformed copy of the cube (does not change the cube given to it)
+def get_action_result(cube, action):
+    if action[1] == 'X':
+        cube_copy = x_rotation(np.copy(cube), action[0], action[2])
+    elif action[1] == 'Y':
+        cube_copy = y_rotation(np.copy(cube), action[0], action[2])
+    elif action[1] == 'Z':
+        cube_copy = z_rotation(np.copy(cube), action[0], action[2])
+    else:
+        cube_copy = np.copy(cube)
+        print("Error: Rotation axis must be X,Y or Z. Not " + action[1] + "\n No rotation made.")
+    return cube_copy
 
-    return cube
 
-
-
+# checks if the cube is solved (all faces are monochromatic)
 def is_goal_state(cube):
     size = np.size(cube[0][0], 0)
     for face in cube:
-        for i  in range(size):
-            for j in range (size):
+        for i in range(size):
+            for j in range(size):
                 if face[i][j] != face[0][0]:
                     return False
     return True
+
+
+def get_entropy(cube):
+    size = np.size(cube[0][0], 0)
+    result = 0
+    # count the occurrences of each color on each face
+    for face in cube:
+        colorCounts = [0, 0, 0, 0, 0, 0]
+        for i in range(size):
+            for j in range(size):
+                colorCounts[face[i][j]] = colorCounts[face[i][j]] + 1
+        for i in range(6):
+            probability = colorCounts[i] / (size * size)
+            result += probability * safe_log2(probability)
+
+
+def get_gini(cube):
+    size = np.size(cube[0][0], 0)
+    result = 0
+
+    # count the occurrences of each color on each face
+    for face in cube:
+        colorCounts = [0, 0, 0, 0, 0, 0]
+        for i in range(size):
+            for j in range(size):
+                colorCounts[face[i][j]] = colorCounts[face[i][j]] + 1
+        for i in range(6):
+            probability = colorCounts[i] / (size * size)
+            result += probability * (1 - probability)
+
+
+def get_chaos(cube):
+    size = np.size(cube[0][0], 0)
+    result = 0
+    # count the occurrences of each color on each face
+    for face in cube:
+        colorCounts = [1, 1, 1, 1, 1, 1]
+        for i in range(size):
+            for j in range(size):
+                colorCounts[face[i][j]] = colorCounts[face[i][j]] + 1
+        for i in range(6):
+            probability = colorCounts[i] / (size * size)
+            if probability > 0:
+                result *= probability
+
+
+# Todo safe_log
+def safe_log2(x):
+    return x

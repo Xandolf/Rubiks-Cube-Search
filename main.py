@@ -4,12 +4,7 @@ import numpy as np
 from matplotlib import colors as c
 import cube as cbe
 
-
 # TODO {
-#   Test Rotations
-#   ... X-axis
-#   ... Y-axis
-#   ... Z-axis
 #   Searches
 #   ... Breadth First
 #   ... Depth First
@@ -25,29 +20,31 @@ import cube as cbe
 #  }
 
 
-
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     cube = cbe.init_cube(3)
-    actions = cbe.getAllActions(cube)
+    print(cbe.get_entropy(cube))
+    print(cbe.get_gini(cube))
+    print(cbe.get_chaos(cube))
+
+    rand_moves = cbe.generate_random_moves(cube, 300)
+    for move in rand_moves:
+        cube = cbe.get_action_result(cube, move)
+
+    print(cbe.get_entropy(cube))
+    print(cbe.get_gini(cube))
+    print(cbe.get_chaos(cube))
+
+    inv_moves = cbe.invert_moves(rand_moves)
+    for move in inv_moves:
+        cube = cbe.get_action_result(cube, move)
+
+    print(cbe.get_entropy(cube))
+    print(cbe.get_gini(cube))
+    print(cbe.get_chaos(cube))
 
 
-    for i in range(10):
-        cube = cbe.z_rotation(cube, 1, 1)
-        cube = cbe.z_rotation(cube, 2, 1)
-        cube = cbe.y_rotation(cube, 1, 1)
-        cube = cbe.x_rotation(np.copy(cube), 0, -1)
-
-    for i in range (10):
-        cube = cbe.x_rotation(np.copy(cube), 0, 1)
-        cube = cbe.y_rotation(cube, 1, -1)
-        cube = cbe.z_rotation(cube, 2, -1)
-        cube = cbe.z_rotation(cube, 1, -1)
-
-
-    # cbe.print_cube (cube, annotate=True)
     print(cbe.is_goal_state(cube))
 
     print("\n---------\n")
     # print(cube)
-

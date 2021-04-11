@@ -2,6 +2,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import colors as c
+import random
 
 
 def test_print():
@@ -200,6 +201,7 @@ def get_entropy(cube):
         for i in range(6):
             probability = colorCounts[i] / (size * size)
             result += probability * safe_log2(probability)
+    return result
 
 
 def get_gini(cube):
@@ -215,11 +217,12 @@ def get_gini(cube):
         for i in range(6):
             probability = colorCounts[i] / (size * size)
             result += probability * (1 - probability)
+    return -result
 
 
 def get_chaos(cube):
     size = np.size(cube[0][0], 0)
-    result = 0
+    result = 1
     # count the occurrences of each color on each face
     for face in cube:
         colorCounts = [1, 1, 1, 1, 1, 1]
@@ -230,8 +233,30 @@ def get_chaos(cube):
             probability = colorCounts[i] / (size * size)
             if probability > 0:
                 result *= probability
+    return -result
 
 
-# Todo safe_log
 def safe_log2(x):
-    return x
+    if x == 0:
+        return 0
+    else:
+        return np.log2(x)
+
+
+# Testing Functions
+def generate_random_moves(cube, moves_count):
+    actions = get_all_actions(cube)
+    ret_moves = []
+    for i in range(moves_count):
+        mi = random.randint(0, len(actions) - 1)
+        ret_moves = ret_moves + [actions[mi]]
+    print(ret_moves)
+    return ret_moves
+
+
+def invert_moves(moves):
+    inv_moves = []
+    for move in moves:
+        inv_moves = [(move[0], move[1], -move[2])] + inv_moves
+    print(inv_moves)
+    return inv_moves

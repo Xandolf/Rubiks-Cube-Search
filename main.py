@@ -10,7 +10,6 @@ import cube as cbe
 #   ... Depth First
 #   ... A*
 #   Heuristics
-#   ... safe_log2
 #   ... (3-D?) Manhattan Distance
 #   ... incorrect tiles
 #   Analysis
@@ -23,28 +22,34 @@ import cube as cbe
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     cube = cbe.init_cube(3)
-    print(cbe.get_entropy(cube))
+    # print(cbe.get_entropy(cube))
     print(cbe.get_gini(cube))
-    print(cbe.get_chaos(cube))
+    # print(cbe.get_chaos(cube))
 
-    rand_moves = cbe.generate_random_moves(cube, 300)
+    rand_moves = cbe.generate_random_moves(cube, 5)
+    print(rand_moves)
     for move in rand_moves:
         cube = cbe.get_action_result(cube, move)
 
-    print(cbe.get_entropy(cube))
-    print(cbe.get_gini(cube))
-    print(cbe.get_chaos(cube))
+    solution = cbe.astar_search(cube, cbe.get_misplaced_tiles)
+    print("Nodes Expanded: ", solution[1])
 
-    inv_moves = cbe.invert_moves(rand_moves)
-    for move in inv_moves:
+    for move in solution[0]:
         cube = cbe.get_action_result(cube, move)
 
-    print(cbe.get_entropy(cube))
-    print(cbe.get_gini(cube))
-    print(cbe.get_chaos(cube))
+    print(solution)
 
+    #
+    # inv_moves = cbe.invert_moves(rand_moves)
+    # for move in inv_moves:
+    #     cube = cbe.get_action_result(cube, move)
+
+    # print(cbe.get_entropy(cube))
+    # print(cbe.get_gini(cube))
+    # print(cbe.get_chaos(cube))
+
+    cbe.print_cube(cube)
 
     print(cbe.is_goal_state(cube))
 
     print("\n---------\n")
-    # print(cube)

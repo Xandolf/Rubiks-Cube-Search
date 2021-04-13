@@ -201,6 +201,18 @@ def get_entropy(cube):
         for i in range(6):
             probability = colorCounts[i] / (size * size)
             result += probability * safe_log2(probability)
+    return -1 * result
+
+
+def get_misplaced_tiles(cube):
+    size = np.size(cube[0][0], 0)
+    result = 0
+    # count the occurrences of each color on each face
+    for face in cube:
+        for i in range(size):
+            for j in range(size):
+                if face[0][0] != face[i][j]:
+                    result = result + 1
     return result
 
 
@@ -217,7 +229,7 @@ def get_gini(cube):
         for i in range(6):
             probability = colorCounts[i] / (size * size)
             result += probability * (1 - probability)
-    return -result
+    return -1 * result
 
 
 def get_chaos(cube):
@@ -233,7 +245,7 @@ def get_chaos(cube):
             probability = colorCounts[i] / (size * size)
             if probability > 0:
                 result *= probability
-    return -result
+    return result * -1
 
 
 def safe_log2(x):
@@ -250,13 +262,78 @@ def generate_random_moves(cube, moves_count):
     for i in range(moves_count):
         mi = random.randint(0, len(actions) - 1)
         ret_moves = ret_moves + [actions[mi]]
-    print(ret_moves)
     return ret_moves
 
 
+# Inverts a given action sequence (Undo)
 def invert_moves(moves):
     inv_moves = []
     for move in moves:
         inv_moves = [(move[0], move[1], -move[2])] + inv_moves
-    print(inv_moves)
     return inv_moves
+
+
+# A* search
+def astar_search(cube, heuristic):
+    nodes_expanded = 0
+    # Create lists for fringe and expanded states
+    fringe = []
+    expanded = []
+    # Get all the possible rotations
+    actions = get_all_actions(cube)
+
+    # Create a start node to push onto fringe
+    action_sequence = []
+    cost = heuristic(cube)
+    start_node = (cube, cost, action_sequence)
+    fringe.append(start_node)
+
+    # Loop while we still have elements on the fringe
+    while len(fringe) > 0 and nodes_expanded < 100000:
+        # Sort the fringe to get the node with the lowest cost first
+        # fringe = sorted(fringe, key=lambda x: x[1])
+        # Get the node with the lowest cost
+        current_node = fringe.pop(0)
+        nodes_expanded += 1
+        # Add the current node to the closed list
+        expanded.append(current_node)
+
+        # Check if we have reached the goal, return the path
+        if is_goal_state(current_node[0]):
+            return (current_node[2] , nodes_expanded)
+
+        # Else not the goal state:
+        # Unzip the current node position
+        currentCube, currentPath = current_node[0], current_node[2]
+        # Get neighbors
+        for action in actions:
+            neighborCube = get_action_result(currentCube, action)
+            if not_in_expanded(expanded, neighborCube):
+                neighborPath = currentPath + [action]
+                neighborCost = len(neighborPath) + heuristic(neighborCube)
+                neighbor = (neighborCube, neighborCost, neighborPath)
+                if add_to_fringe(fringe, neighbor) and not_in_expanded(expanded,neighborCube):
+                    fringe.append(neighbor)
+    # Return None, no path is found
+    return None
+
+
+# Check if a neighbor should be added to open list
+def add_to_fringe(fringe, neighbor):
+    for node in fringe:
+        if (neighbor[0] == node[0]).all() and neighbor[2] >= node[2]:
+            print("Already On Fringe")
+            return False
+    print("Added To Fringe")
+    return True
+
+
+# Check if a neighbor should be added to open list
+def not_in_expanded(expanded, neighborCube):
+    for c in expanded:
+        if c == neighborCube:
+            print("Already Expanded")
+            return False
+
+    print("Time to Expanded")
+    return True

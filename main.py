@@ -21,17 +21,20 @@ import cube as cbe
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    cube = cbe.init_cube(3)
-    # print(cbe.get_entropy(cube))
-    print(cbe.get_gini(cube))
-    # print(cbe.get_chaos(cube))
+    cube = cbe.init_num_cube(3)
+    print(cbe.get_perfect_rows(cube))
+    # cbe.print_cube(cube,annotate=True)
+    print(cbe.is_goal_state(cube))
 
-    rand_moves = cbe.generate_random_moves(cube, 5)
+    rand_moves = cbe.generate_random_moves(cube, 10)
     print(rand_moves)
     for move in rand_moves:
         cube = cbe.get_action_result(cube, move)
 
-    solution = cbe.astar_search(cube, cbe.get_misplaced_tiles)
+
+    print(cbe.get_perfect_rows(cube))
+
+    solution = cbe.astar_search(cube, cbe.get_perfect_rows)
     print("Nodes Expanded: ", solution[1])
 
     for move in solution[0]:
@@ -39,7 +42,7 @@ if __name__ == '__main__':
 
     print(solution)
 
-    #
+
     # inv_moves = cbe.invert_moves(rand_moves)
     # for move in inv_moves:
     #     cube = cbe.get_action_result(cube, move)
@@ -48,7 +51,7 @@ if __name__ == '__main__':
     # print(cbe.get_gini(cube))
     # print(cbe.get_chaos(cube))
 
-    cbe.print_cube(cube)
+    # cbe.print_cube(cube)
 
     print(cbe.is_goal_state(cube))
 
